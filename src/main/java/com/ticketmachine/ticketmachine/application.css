@@ -1,0 +1,36 @@
+.button{
+	-fx-background-color: #0089FF;
+	-fx-font-size: 34;
+	-fx-font-weight:700;
+	-fx-alignment: center;
+	-fx-background-radius: 30 30 30 30;
+	-fx-text-fill: #ffffff;
+	-fx-border-color: white;
+	-fx-border-radius: 30 30 30 30;
+	-fx-effect: dropshadow( gaussian , rgba(0,0,0,0.7) , 20,0,0,0 );
+}
+
+.button:pressed{
+	-fx-background-color: #98c1d9;
+	-fx-effect: dropshadow( gaussian , rgba(0,0,0,0.0) , 0,0,0,0 );
+	
+}
+
+.root
+{
+	-fx-background-color: #3d5a80;
+
+	
+}
+
+
+
+#timeLabel
+{
+	-fx-font-size: 65;
+	-fx-text-fill: #ffffff;
+	-fx-font-weight:700;
+	-fx-alignment: center;
+	-fx-background-color: #c8a951;
+	-fx-background-radius: 30 30 30 30;
+}
