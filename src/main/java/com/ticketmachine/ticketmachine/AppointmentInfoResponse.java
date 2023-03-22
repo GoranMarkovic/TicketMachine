@@ -1,6 +1,8 @@
 package com.ticketmachine.ticketmachine;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 
 import java.time.LocalDateTime;
 
@@ -9,7 +11,8 @@ public class AppointmentInfoResponse {
     @JsonProperty("clients_in_front")
     private int clientsInFront;
     @JsonProperty("arrival_time")
-    private LocalDateTime arrivalTime;
+	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
+	private LocalDateTime arrivalTime;
     
     
     

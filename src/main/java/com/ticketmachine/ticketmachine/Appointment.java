@@ -1,6 +1,8 @@
 package com.ticketmachine.ticketmachine;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 
 import java.time.LocalDateTime;
 
@@ -11,12 +13,14 @@ public class Appointment {
     private Service service;
     private String tag;
     @JsonProperty("created_time")
-//	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
+	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
 	private LocalDateTime createdTime;
     @JsonProperty("called_out_time")
-    private LocalDateTime calledOutTime;
+	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
+	private LocalDateTime calledOutTime;
     @JsonProperty("finished_time")
-    private LocalDateTime finishedTime;
+	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
+	private LocalDateTime finishedTime;
     @JsonProperty("in_progress")
     private boolean inProgress;
     private boolean finished;

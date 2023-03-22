@@ -133,8 +133,8 @@ public class SampleController
 		StringBuffer content = new StringBuffer();
 		try {
 			// Set up the URL and open a connection
-//			URL url = new URL("http://10.99.156.187:8080/api/services");
-			URL url = new URL("http://localhost:8080/api/services");
+			URL url = new URL("http://10.99.156.187:8080/api/services");
+//			URL url = new URL("http://localhost:8080/api/services");
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
 			// Set the request method to POST
@@ -164,7 +164,9 @@ public class SampleController
 		StringBuffer content = new StringBuffer();
 		try {
 			// Set up the URL and open a connection
-			URL url = new URL("http://localhost:8080/api/appointments/ticket-machine/new?service_id="+serviceId);
+//			URL url = new URL("http://localhost:8080/api/appointments/ticket-machine/new?service_id="+serviceId);
+			URL url = new URL("http://10.99.156.187:8080/api/appointments/new?service_id="+serviceId);
+
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
 			// Set the request method to POST
@@ -256,8 +258,8 @@ public class SampleController
         StringBuffer content = new StringBuffer();
         try {
             // Set up the URL and open a connection
-//            URL url = new URL("http://10.99.156.187:8080/api/authenticate/external");
-			URL url = new URL("http://localhost:8080/api/authenticate/external");
+            URL url = new URL("http://10.99.156.187:8080/api/authenticate/external");
+//			URL url = new URL("http://localhost:8080/api/authenticate/external");
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
             // Set the request method to POST
