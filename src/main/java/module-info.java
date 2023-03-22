@@ -1,4 +1,4 @@
-module com.ticketmachine.ticketmachene {
+module com.ticketmachine.ticketmachine {
     requires javafx.controls;
     requires javafx.fxml;
     requires okhttp3;
@@ -7,7 +7,6 @@ module com.ticketmachine.ticketmachene {
     requires com.fasterxml.jackson.core;
     requires java.desktop;
     requires java.sql;
-
 
     opens com.ticketmachine.ticketmachine to javafx.fxml;
     exports com.ticketmachine.ticketmachine;

@@ -34,6 +34,13 @@ public class JSONParser {
 		}
 	}
 
+	public static JWT createJWTObject(String jsonString) {
+		try {
+			return objectMapper.readValue(jsonString, JWT.class);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 	public static List<Appointment> createAppointmentListObject(String jsonString) {
 		try {
 			return objectMapper.readValue(jsonString, new TypeReference<List<Appointment>>(){});

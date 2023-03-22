@@ -1,6 +1,5 @@
 package com.ticketmachine.ticketmachine;
 
-import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -12,7 +11,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import javafx.util.Duration;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -38,21 +37,33 @@ public class SampleController
 	private static int counter=0;
 	
 	private final ExecutorService executorService = Executors.newCachedThreadPool();
-	
-	private Button[] buttons= {buttonRodjeni,buttonUmrli,buttonVjencani,buttonMaticnaSluzba};
 	private List<Service> services;
+	int globalValue;
 
-	
-	
-	
+	public SampleController()
+	{
+		this(0);
+	}
+
+	public SampleController(int globalValue) {
+		this.globalValue=globalValue;
+	}
+
+	private Button[] buttons;
+	private static String jwtToken;
+	@FXML
 	public void initialize()
 	{
 		Timenow();
 		//poziv za prikaz servisa
-		getAllServices();
+//		getAllServices();
+		postRequest("as");
+//		jwtToken=postRequest("url");
+		buttons= new Button[]{buttonRodjeni, buttonUmrli, buttonVjencani, buttonMaticnaSluzba};
+		getAllServices(buttons);
 	}
 	
-	private void getAllServices() {
+	private void getAllServices(Button[] buttons) {
 		Thread thread = new Thread(){
 	    	public void run() {
 	    		try {
@@ -69,7 +80,7 @@ public class SampleController
 	            	for(int i=0;i<4;i++)//4 zbog broja button
 	            	{
 	            		Service tmp=services.get(i);
-	            		buttons[i+1].setText(tmp.getName());
+	            		buttons[i].setText(tmp.getName());
 	            		System.out.println(tmp.getName());
 	            		System.out.println(tmp.getId());
 	            	}
@@ -81,22 +92,34 @@ public class SampleController
 	    thread.start();
 	}
 	
-	
+	@FXML
 	private void onClick(long serviceId) {
 		//otvoriti dialog
+		Stage stage=(Stage)root.getScene().getWindow();
+		Dialog<Boolean> dialog=new Dialog<Boolean>();
+		dialog.setTitle("Sacekajte listic");
+		dialog.initOwner(stage);
+		stage.setAlwaysOnTop(true);
+		dialog.show();
+
+
 		Thread thread = new Thread(){
 	    	public void run() {
 	    		try {
 	    			AppointmentInfoResponse appointmentInfoResponse = createNewAppointment(serviceId).get();
-	    			
-	    		} catch (InterruptedException e) {
+					Appointment appointment=appointmentInfoResponse.getAppointment();
+					String clientsInFront=Integer.toString(appointmentInfoResponse.getClientsInFront());
+//					PrintClass pc=new PrintClass(appointment.getService().getName(), appointment.getService().getOfficeName(),clientsInFront,appointment.getTag());
+
+				} catch (InterruptedException e) {
 	    			e.printStackTrace();
 	    		} catch (ExecutionException e) {
 	    			e.printStackTrace();
 	    		}
 	    		
 	            Platform.runLater(() -> {
-	                 //ovdje zatvoriti dialog
+	                 dialog.setResult(true);
+					 dialog.close();
 	            });
 		        
 
@@ -104,10 +127,72 @@ public class SampleController
 	    };
 	    thread.start();
 	}
-	
+
+	private String getServicesRequest()
+	{
+		StringBuffer content = new StringBuffer();
+		try {
+			// Set up the URL and open a connection
+//			URL url = new URL("http://10.99.156.187:8080/api/services");
+			URL url = new URL("http://localhost:8080/api/services");
+			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+			// Set the request method to POST
+			con.setRequestMethod("GET");
+
+			// Set the request content type to JSON
+			con.setRequestProperty("Content-Type", "application/json");
+			con.setRequestProperty("Authorization", "Bearer "+jwtToken);
+			// Read the response
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String inputLine;
+			while ((inputLine = in.readLine()) != null) {
+				content.append(inputLine);
+			}
+			in.close();
+
+			// Print the response content
+			System.out.println(content.toString());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return content.toString();
+	}
+
+	private String createNewAppointmentRequest(long serviceId)
+	{
+		StringBuffer content = new StringBuffer();
+		try {
+			// Set up the URL and open a connection
+			URL url = new URL("http://localhost:8080/api/appointments/ticket-machine/new?service_id="+serviceId);
+			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+			// Set the request method to POST
+			con.setRequestMethod("GET");
+
+			// Set the request content type to JSON
+			con.setRequestProperty("Content-Type", "application/json");
+			con.setRequestProperty("Authorization", "Bearer "+jwtToken);
+			// Read the response
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String inputLine;
+			while ((inputLine = in.readLine()) != null) {
+				content.append(inputLine);
+			}
+			in.close();
+
+			// Print the response content
+			System.out.println(content.toString());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return content.toString();
+
+	}
+
 	private Future<List<Service>>getServices(){
 		Callable<List<Service>> task = () -> {
-			String response = ApiRest.get("http://localhost:8080/api/services").get();
+			String response = getServicesRequest();
 			return JSONParser.createServiceListObject(response);
 		};
 		
@@ -116,7 +201,8 @@ public class SampleController
 	
 	private Future<AppointmentInfoResponse>createNewAppointment(long serviceId){
 		Callable<AppointmentInfoResponse> task = () -> {
-			String response = ApiRest.get("http://localhost:8080/api/appointments/ticket-machine/new?service_id="+serviceId).get();
+			String response = createNewAppointmentRequest(serviceId);
+			System.out.println(response);
 			return JSONParser.createAppointmentInfoResponseObject(response);
 		};
 		
@@ -165,12 +251,13 @@ public class SampleController
 	    thread.start();
 	}
 	
-	private String getRequest(String url_string)
+	private String postRequest(String url_string)
 	{
         StringBuffer content = new StringBuffer();
         try {
             // Set up the URL and open a connection
-            URL url = new URL(url_string);
+//            URL url = new URL("http://10.99.156.187:8080/api/authenticate/external");
+			URL url = new URL("http://localhost:8080/api/authenticate/external");
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
             // Set the request method to POST
@@ -199,62 +286,102 @@ public class SampleController
         } catch (Exception e) {
             e.printStackTrace();
         }
-		
+		JWT jwt=JSONParser.createJWTObject(content.toString());
+		jwtToken=jwt.getToken();
 		return content.toString();
 	}
 	
 	@FXML private void rodjeniClicked()
 	{
 		//naci service id iz komponente
-		onClick(1);
-		
-		
-		//uzeti podatke sa servera
-		String username="ticketMachine";
-		String password="CkwMhvpgcdKAJp46Vvjbq7XrAxLGYKTa5XPfs4g";
-		String ipAddress="192.168.1.6:8080/api/authenticate/external";
-		String URL="http://"+ipAddress;
-		String ret= getRequest(URL);
-		System.out.println(ret);
-		PrintClass pc=new PrintClass("Upis u matičnu knjigu rođenih", "6", "4", "B23");
+//		onClick(1);
+		String buttonText=buttonRodjeni.getText();
+		Service service = null;
+		for(int i=0;i<services.size();i++)
+		{
+			if(services.get(i).getName()==buttonText)
+			{
+				service=services.get(i);
+			}
+		}
+
+		//uraditi get new appointment
+		onClick(service.getId());
+		//procitati odgovor
+
+//		PrintClass pc=new PrintClass("Upis u matičnu knjigu rođenih", "6", "4", "B23");
 		//pc.printNumber();
 	}
 	
 	@FXML private void umrliClicked() 
 	{
 		//uzeti podatke sa servera
-		PrintClass pc=new PrintClass("Upis u matičnu knjigu umrlih", "6", "4", "B23");
-		System.out.println(counter);
-		counter++;
-		changeStateOfButtons();
-        PauseTransition pause = new PauseTransition(Duration.seconds(5));
-        pause.setOnFinished(e -> changeStateOfButtons());
-        pause.play();
-		//pc.printNumber();
-        Stage stage=(Stage)root.getScene().getWindow();
-        Dialog<Boolean> dialog=new Dialog<Boolean>();
-        dialog.setTitle("Sacekajte listic");
-        dialog.initOwner(stage);
-        stage.setAlwaysOnTop(true);
-        dialog.show();
-        
-        PauseTransition dialogTransition= new PauseTransition(Duration.seconds(5));
-        dialogTransition.setOnFinished(e-> dialog.setResult(true));
-        dialogTransition.play();
-        dialog.close();
+//		PrintClass pc=new PrintClass("Upis u matičnu knjigu umrlih", "6", "4", "B23");
+//		System.out.println(counter);
+//		counter++;
+//		changeStateOfButtons();
+//        PauseTransition pause = new PauseTransition(Duration.seconds(5));
+//        pause.setOnFinished(e -> changeStateOfButtons());
+//        pause.play();
+//		//pc.printNumber();
+//        Stage stage=(Stage)root.getScene().getWindow();
+//        Dialog<Boolean> dialog=new Dialog<Boolean>();
+//        dialog.setTitle("Sacekajte listic");
+//        dialog.initOwner(stage);
+//        stage.setAlwaysOnTop(true);
+//        dialog.show();
+//
+//        PauseTransition dialogTransition= new PauseTransition(Duration.seconds(5));
+//        dialogTransition.setOnFinished(e-> dialog.setResult(true));
+//        dialogTransition.play();
+//        dialog.close();
+		String buttonText=buttonUmrli.getText();
+		Service service = null;
+		for(int i=0;i<services.size();i++)
+		{
+			if(services.get(i).getName()==buttonText)
+			{
+				service=services.get(i);
+			}
+		}
+
+		//uraditi get new appointment
+		onClick(service.getId());
 	}
 	
 	@FXML private void vjencaniClicked()
 	{
 		//uzeti podatke sa servera
-		PrintClass pc=new PrintClass("Upis u matičnu knjigu vjenčanih", "6", "4", "B23");
 		//pc.printNumber();
+		String buttonText=buttonVjencani.getText();
+		Service service = null;
+		for(int i=0;i<services.size();i++)
+		{
+			if(services.get(i).getName()==buttonText)
+			{
+				service=services.get(i);
+			}
+		}
+
+		//uraditi get new appointment
+		onClick(service.getId());
 	}
 	
 	@FXML private void maticnaSluzbaClicked()
 	{
-		PrintClass pc=new PrintClass("Upis u matičnu knjigu vjenčanih", "6", "4", "B23");
 		//pc.printNumber();
+		String buttonText=buttonMaticnaSluzba.getText();
+		Service service = null;
+		for(int i=0;i<services.size();i++)
+		{
+			if(services.get(i).getName()==buttonText)
+			{
+				service=services.get(i);
+			}
+		}
+
+		//uraditi get new appointment
+		onClick(service.getId());
 
 	}
 	
