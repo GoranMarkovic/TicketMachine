@@ -11,21 +11,23 @@ import java.time.format.DateTimeFormatter;
 public class PrintClass {
 	
 	public String usluga="Vrsta usluge";
-	public String salter="Broj saltera";
+	public String kancelarija ="Broj kancelarije";
 	public String brojIspred= "13";
 	public String redniBroj="47";
-	
-	public PrintClass(String usluga, String salter, String brojIspred, String redniBroj)
+	public LocalDateTime vrijemeIzdavanja;
+	public LocalDateTime vrijemeUsluzivanja;
+
+	public PrintClass(String usluga, String kancelarija, String brojIspred, String redniBroj, LocalDateTime vrijemeIzdavanja, LocalDateTime vrijemeUsluzivanja)
 	{
 		this.usluga=usluga;
-		this.salter=salter;
+		this.kancelarija = kancelarija;
 		this.brojIspred=brojIspred;
 		this.redniBroj=redniBroj;
+		this.vrijemeIzdavanja = vrijemeIzdavanja;
+		this.vrijemeUsluzivanja = vrijemeUsluzivanja;
 	}
 	
 	public class QueueNumberPaper implements Printable{
-		
-
 
 		@Override
 		public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
@@ -48,9 +50,7 @@ public class PrintClass {
 					int yShift=25;
 					int widthOfString=0;
 					int starting=0;
-					//Image gradlogo=Toolkit.getDefaultToolkit().getImage("file:///BLsrednji.jpg");
-					//g2d.drawImage(gradlogo, 22, 40, 40, 40, null);
-					
+
 					g2d.drawLine(10, y, 200, y);
 					int height2=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,56)).getHeight();
 					System.out.println(height2);
@@ -63,15 +63,18 @@ public class PrintClass {
 					g2d.drawLine(10, y, 200, y);
 					y+=yShift;
 
-					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,12)).stringWidth("Vrijeme izdavanja: 22:30");
+					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,12)).stringWidth("Vrijeme izdavanja: "+dtf.format(vrijemeIzdavanja));
 					starting=(int)(width-widthOfString)/2;
 					g2d.setFont(new Font("Times New Roman", Font.BOLD,12));
-					g2d.drawString("Vrijeme izdavanja: "+dtf.format(now), starting, y);
-					
-					/*g2d.setFont(new Font("Times New Roman", Font.BOLD,12));
-					g2d.drawString("Vrijeme izdavanja: ", 22, y);
-					g2d.setFont(new Font("Times New Roman", Font.PLAIN,12));
-					g2d.drawString(dtf.format(now), 120, y);*/
+					g2d.drawString("Vrijeme izdavanja: "+dtf.format(vrijemeIzdavanja), starting, y);
+					y+=yShift;
+
+
+					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,12)).stringWidth("Vrijeme usluživanja: "+dtf.format(vrijemeUsluzivanja));
+					starting=(int)(width-widthOfString)/2;
+					g2d.setFont(new Font("Times New Roman", Font.BOLD,12));
+					g2d.drawString("Vrijeme usluživanja: "+dtf.format(vrijemeUsluzivanja), starting, y);
+
 					y+=yShift;
 					
 					g2d.setFont(new Font("Times New Roman", Font.BOLD,12));
@@ -81,9 +84,9 @@ public class PrintClass {
 					y+=yShift;
 					
 					g2d.setFont(new Font("Times New Roman", Font.BOLD,12));
-					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,12)).stringWidth("Salter: "+salter);
+					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,12)).stringWidth("Kancelarija: "+ kancelarija);
 					starting=(int)(width-widthOfString)/2;
-					g2d.drawString("�alter: "+salter, starting, y);
+					g2d.drawString("Kancelarija: "+ kancelarija, starting, y);
 					y+=yShift;
 					
 					g2d.setFont(new Font("Times New Roman", Font.BOLD,12));
@@ -91,8 +94,6 @@ public class PrintClass {
 					starting=(int)(width-widthOfString)/2;
 					g2d.drawString("Broj klijenata ispred Vas: "+brojIspred, starting, y);
 					y+=yShift;
-
-					
 
 					
 				}
@@ -148,14 +149,13 @@ protected static double toPPI(double inch)
 			//ispod unijeti ime stampaca
 			//EPSON TM-T88VI Receipt
 			//Microsoft Print to PDF
-			if(service.getName().equals("EPSON TM-T88VI Receipt"))
+			if(service.getName().equals("Microsoft Print to PDF"))
 			{
 				try
 				{
 					pj.setPrintService(service);
 					pj.setPrintable(new QueueNumberPaper(),getPageFormat(pj));
 					pj.print();
-					//Thread.sleep(1000);
 				}
 				catch(Exception e)
 				{

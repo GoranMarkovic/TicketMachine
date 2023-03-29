@@ -12,7 +12,6 @@ public class MobileUser {
     
 	public MobileUser() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 	public MobileUser(long id, String deviceId) {
 		super();

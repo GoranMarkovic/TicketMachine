@@ -12,6 +12,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -26,10 +27,10 @@ public class SampleController
 {
 
 	@FXML private BorderPane root;
-	@FXML private Button buttonRodjeni;
-	@FXML private Button buttonUmrli;
-	@FXML private Button buttonVjencani;
-	@FXML private Button buttonMaticnaSluzba;
+	@FXML private Button button1;
+	@FXML private Button button2;
+	@FXML private Button button3;
+	@FXML private Button button4;
 	@FXML public Label labelDateAndTime;
 	@FXML AnchorPane anchorPaneButtons;
 	@FXML private GridPane buttonGridPane; 
@@ -55,11 +56,8 @@ public class SampleController
 	public void initialize()
 	{
 		Timenow();
-		//poziv za prikaz servisa
-//		getAllServices();
 		postRequest("as");
-//		jwtToken=postRequest("url");
-		buttons= new Button[]{buttonRodjeni, buttonUmrli, buttonVjencani, buttonMaticnaSluzba};
+		buttons= new Button[]{button1, button2, button3, button4};
 		getAllServices(buttons);
 	}
 	
@@ -97,7 +95,7 @@ public class SampleController
 		//otvoriti dialog
 		Stage stage=(Stage)root.getScene().getWindow();
 		Dialog<Boolean> dialog=new Dialog<Boolean>();
-		dialog.setTitle("Sacekajte listic");
+		dialog.setTitle("Sačekajte listić");
 		dialog.initOwner(stage);
 		stage.setAlwaysOnTop(true);
 		dialog.show();
@@ -109,7 +107,9 @@ public class SampleController
 	    			AppointmentInfoResponse appointmentInfoResponse = createNewAppointment(serviceId).get();
 					Appointment appointment=appointmentInfoResponse.getAppointment();
 					String clientsInFront=Integer.toString(appointmentInfoResponse.getClientsInFront());
-//					PrintClass pc=new PrintClass(appointment.getService().getName(), appointment.getService().getOfficeName(),clientsInFront,appointment.getTag());
+					PrintClass pc=new PrintClass(appointment.getService().getName(), appointment.getService().getOfficeName(),clientsInFront,appointment.getTag(),
+							appointment.getCreatedTime(),appointmentInfoResponse.getArrivalTime());
+					pc.printNumber();
 
 				} catch (InterruptedException e) {
 	    			e.printStackTrace();
@@ -133,9 +133,9 @@ public class SampleController
 		StringBuffer content = new StringBuffer();
 		try {
 			// Set up the URL and open a connection
-			URL url = new URL("http://10.99.156.187:8080/api/services");
+			URL url = new URL("https://qm.banjaluka.rs.ba:443/api/services");
 //			URL url = new URL("http://localhost:8080/api/services");
-			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+			HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
 
 			// Set the request method to POST
 			con.setRequestMethod("GET");
@@ -151,8 +151,6 @@ public class SampleController
 			}
 			in.close();
 
-			// Print the response content
-			System.out.println(content.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -164,8 +162,8 @@ public class SampleController
 		StringBuffer content = new StringBuffer();
 		try {
 			// Set up the URL and open a connection
-//			URL url = new URL("http://localhost:8080/api/appointments/ticket-machine/new?service_id="+serviceId);
-			URL url = new URL("http://10.99.156.187:8080/api/appointments/new?service_id="+serviceId);
+//			URL url = new URL("http://localhost:8080/api/appointments/new?service_id="+serviceId);
+			URL url = new URL("https://qm.banjaluka.rs.ba:443/api/appointments/new?service_id="+serviceId);
 
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
@@ -183,8 +181,6 @@ public class SampleController
 			}
 			in.close();
 
-			// Print the response content
-			System.out.println(content.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -204,32 +200,13 @@ public class SampleController
 	private Future<AppointmentInfoResponse>createNewAppointment(long serviceId){
 		Callable<AppointmentInfoResponse> task = () -> {
 			String response = createNewAppointmentRequest(serviceId);
-			System.out.println(response);
 			return JSONParser.createAppointmentInfoResponseObject(response);
 		};
 		
 		return executorService.submit(task);
 	}
 	
-	private void changeStateOfButtons()
-	{
-		if(buttonRodjeni.isDisabled())
-		{
-			buttonRodjeni.setDisable(false);
-			buttonUmrli.setDisable(false);
-			buttonVjencani.setDisable(false);
-			buttonMaticnaSluzba.setDisable(false);
-		}
-		
-		else
-		{
-			buttonRodjeni.setDisable(true);
-			buttonUmrli.setDisable(true);
-			buttonVjencani.setDisable(true);
-			buttonMaticnaSluzba.setDisable(true);
-		}
-	}
-	
+
 	private void Timenow(){
 	    Thread thread = new Thread(){
 	    	public void run() {
@@ -258,7 +235,7 @@ public class SampleController
         StringBuffer content = new StringBuffer();
         try {
             // Set up the URL and open a connection
-            URL url = new URL("http://10.99.156.187:8080/api/authenticate/external");
+            URL url = new URL("https://qm.banjaluka.rs.ba:443/api/authenticate/external");
 //			URL url = new URL("http://localhost:8080/api/authenticate/external");
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
@@ -284,7 +261,6 @@ public class SampleController
             in.close();
 
             // Print the response content
-            System.out.println(content.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -293,51 +269,9 @@ public class SampleController
 		return content.toString();
 	}
 	
-	@FXML private void rodjeniClicked()
+	@FXML private void button1Clicked()
 	{
-		//naci service id iz komponente
-//		onClick(1);
-		String buttonText=buttonRodjeni.getText();
-		Service service = null;
-		for(int i=0;i<services.size();i++)
-		{
-			if(services.get(i).getName()==buttonText)
-			{
-				service=services.get(i);
-			}
-		}
-
-		//uraditi get new appointment
-		onClick(service.getId());
-		//procitati odgovor
-
-//		PrintClass pc=new PrintClass("Upis u matičnu knjigu rođenih", "6", "4", "B23");
-		//pc.printNumber();
-	}
-	
-	@FXML private void umrliClicked() 
-	{
-		//uzeti podatke sa servera
-//		PrintClass pc=new PrintClass("Upis u matičnu knjigu umrlih", "6", "4", "B23");
-//		System.out.println(counter);
-//		counter++;
-//		changeStateOfButtons();
-//        PauseTransition pause = new PauseTransition(Duration.seconds(5));
-//        pause.setOnFinished(e -> changeStateOfButtons());
-//        pause.play();
-//		//pc.printNumber();
-//        Stage stage=(Stage)root.getScene().getWindow();
-//        Dialog<Boolean> dialog=new Dialog<Boolean>();
-//        dialog.setTitle("Sacekajte listic");
-//        dialog.initOwner(stage);
-//        stage.setAlwaysOnTop(true);
-//        dialog.show();
-//
-//        PauseTransition dialogTransition= new PauseTransition(Duration.seconds(5));
-//        dialogTransition.setOnFinished(e-> dialog.setResult(true));
-//        dialogTransition.play();
-//        dialog.close();
-		String buttonText=buttonUmrli.getText();
+		String buttonText= button1.getText();
 		Service service = null;
 		for(int i=0;i<services.size();i++)
 		{
@@ -351,11 +285,9 @@ public class SampleController
 		onClick(service.getId());
 	}
 	
-	@FXML private void vjencaniClicked()
+	@FXML private void button2Clicked()
 	{
-		//uzeti podatke sa servera
-		//pc.printNumber();
-		String buttonText=buttonVjencani.getText();
+		String buttonText= button2.getText();
 		Service service = null;
 		for(int i=0;i<services.size();i++)
 		{
@@ -369,10 +301,25 @@ public class SampleController
 		onClick(service.getId());
 	}
 	
-	@FXML private void maticnaSluzbaClicked()
+	@FXML private void button3Clicked()
 	{
-		//pc.printNumber();
-		String buttonText=buttonMaticnaSluzba.getText();
+		String buttonText= button3.getText();
+		Service service = null;
+		for(int i=0;i<services.size();i++)
+		{
+			if(services.get(i).getName()==buttonText)
+			{
+				service=services.get(i);
+			}
+		}
+
+		//uraditi get new appointment
+		onClick(service.getId());
+	}
+	
+	@FXML private void button4Clicked()
+	{
+		String buttonText= button4.getText();
 		Service service = null;
 		for(int i=0;i<services.size();i++)
 		{

@@ -17,17 +17,11 @@ public class Main extends Application {
             SampleController controller=new SampleController(2);
             loader.setController(controller);
             BorderPane root=(BorderPane)loader.load();
-//            BorderPane root = (BorderPane)FXMLLoader.load(getClass().getResource("Sample.fxml"));
             scene = new Scene(root,1024, 768);
             scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
             primaryStage.setScene(scene);
             primaryStage.setTitle("QManager");
             primaryStage.getIcons().add(new Image("file:///QMLogoReal.jpg"));
-			/*
-			 *     -fx-background-image: url("back.jpg");
-    -fx-background-repeat: stretch;
-    -fx-background-position: center center;
-			 */
             primaryStage.setFullScreen(true);
             primaryStage.setAlwaysOnTop(true);
             primaryStage.show();

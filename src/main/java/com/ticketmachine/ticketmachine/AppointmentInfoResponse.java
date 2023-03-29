@@ -18,7 +18,6 @@ public class AppointmentInfoResponse {
     
 	public AppointmentInfoResponse() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 	public AppointmentInfoResponse(Appointment appointment, int clientsInFront, LocalDateTime arrivalTime) {
 		super();
