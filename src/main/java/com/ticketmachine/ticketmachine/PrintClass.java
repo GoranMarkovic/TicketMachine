@@ -10,10 +10,10 @@ import java.time.format.DateTimeFormatter;
 
 public class PrintClass {
 	
-	public String usluga="Vrsta usluge";
-	public String kancelarija ="Broj kancelarije";
-	public String brojIspred= "13";
-	public String redniBroj="47";
+	public String usluga;
+	public String kancelarija;
+	public String brojIspred;
+	public String redniBroj;
 	public LocalDateTime vrijemeIzdavanja;
 	public LocalDateTime vrijemeUsluzivanja;
 
@@ -34,8 +34,7 @@ public class PrintClass {
 			int result=NO_SUCH_PAGE;
 			
 			 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");  
-			 LocalDateTime now = LocalDateTime.now();  
-			
+
 			if(pageIndex == 0)
 			{
 				Graphics2D g2d= (Graphics2D) graphics;
@@ -56,7 +55,7 @@ public class PrintClass {
 					System.out.println(height2);
 					y+=43;
 					g2d.setFont(new Font("Times New Roman", Font.BOLD,56));
-					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,56)).stringWidth(redniBroj.toString());
+					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,56)).stringWidth(redniBroj);
 					starting=(int)(width-widthOfString)/2;
 					g2d.drawString(redniBroj, starting, y);
 					y+=5;
@@ -90,7 +89,7 @@ public class PrintClass {
 					y+=yShift;
 					
 					g2d.setFont(new Font("Times New Roman", Font.BOLD,12));
-					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,12)).stringWidth("Broj klijenata ispred Vas: "+brojIspred.toString());
+					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,12)).stringWidth("Broj klijenata ispred Vas: "+brojIspred);
 					starting=(int)(width-widthOfString)/2;
 					g2d.drawString("Broj klijenata ispred Vas: "+brojIspred, starting, y);
 					y+=yShift;
