@@ -65,7 +65,7 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <Button fx:id="buttonRodjeni" alignment="CENTER" contentDisplay="CENTER" maxHeight="1024.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#rodjeniClicked" text="Kancelarija 6 &#10;Matična knjiga rođenih" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="1">
+                  <Button fx:id="button1" alignment="CENTER" contentDisplay="CENTER" maxHeight="1024.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#button1Clicked" text="Kancelarija 6 &#10;Matična knjiga rođenih" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="1">
                      <font>
                         <Font name="System Bold" size="60.0" />
                      </font>
@@ -73,7 +73,7 @@
                         <Insets bottom="10.0" left="25.0" right="25.0" top="10.0" />
                      </GridPane.margin>
                   </Button>
-                  <Button fx:id="buttonMaticnaSluzba" alignment="CENTER" contentDisplay="CENTER" maxHeight="1024.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#maticnaSluzbaClicked" text="Kancelarija 7 &#10;Protokol matične službe" textAlignment="CENTER" wrapText="true" GridPane.rowIndex="1">
+                  <Button fx:id="button2" alignment="CENTER" contentDisplay="CENTER" maxHeight="1024.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#button2Clicked" text="Kancelarija 7 &#10;Protokol matične službe" textAlignment="CENTER" wrapText="true" GridPane.rowIndex="1">
                      <font>
                         <Font name="System Bold" size="22.0" />
                      </font>
@@ -81,7 +81,7 @@
                         <Insets bottom="10.0" left="25.0" right="25.0" top="10.0" />
                      </GridPane.margin>
                   </Button>
-                  <Button fx:id="buttonUmrli" alignment="CENTER" contentDisplay="CENTER" maxHeight="1024.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#umrliClicked" text="Kancelarija 8 &#10;Matična knjiga umrlih" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                  <Button fx:id="button3" alignment="CENTER" contentDisplay="CENTER" maxHeight="1024.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#button3Clicked" text="Kancelarija 8 &#10;Matična knjiga umrlih" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
                      <font>
                         <Font name="System Bold" size="60.0" />
                      </font>
@@ -89,7 +89,7 @@
                         <Insets bottom="10.0" left="25.0" right="25.0" top="10.0" />
                      </GridPane.margin>
                   </Button>
-                  <Button fx:id="buttonVjencani" alignment="CENTER" contentDisplay="CENTER" maxHeight="1024.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#vjencaniClicked" text="Kancelarija 5 &#10;Matična knjiga vjenčanih" textAlignment="CENTER" wrapText="true">
+                  <Button fx:id="button4" alignment="CENTER" contentDisplay="CENTER" maxHeight="1024.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#button4Clicked" text="Kancelarija 5 &#10;Matična knjiga vjenčanih" textAlignment="CENTER" wrapText="true">
                      <font>
                         <Font name="System Bold" size="60.0" />
                      </font>

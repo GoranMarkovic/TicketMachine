@@ -51,12 +51,13 @@ public class SampleController
 	}
 
 	private Button[] buttons;
-	private static String jwtToken;
+	private static String jwtToken="";
 	@FXML
 	public void initialize()
 	{
 		Timenow();
-		postRequest("as");
+//		getToken(false);
+//		postRequest();
 		buttons= new Button[]{button1, button2, button3, button4};
 		getAllServices(buttons);
 	}
@@ -105,11 +106,15 @@ public class SampleController
 	    	public void run() {
 	    		try {
 	    			AppointmentInfoResponse appointmentInfoResponse = createNewAppointment(serviceId).get();
-					Appointment appointment=appointmentInfoResponse.getAppointment();
-					String clientsInFront=Integer.toString(appointmentInfoResponse.getClientsInFront());
-					PrintClass pc=new PrintClass(appointment.getService().getName(), appointment.getService().getOfficeName(),clientsInFront,appointment.getTag(),
-							appointment.getCreatedTime(),appointmentInfoResponse.getArrivalTime());
-					pc.printNumber();
+					if(appointmentInfoResponse!=null)
+					{
+						Appointment appointment=appointmentInfoResponse.getAppointment();
+						String clientsInFront=Integer.toString(appointmentInfoResponse.getClientsInFront());
+						PrintClass pc=new PrintClass(appointment.getService().getName(), appointment.getService().getOfficeName(),clientsInFront,appointment.getTag(),
+								appointment.getCreatedTime(),appointmentInfoResponse.getArrivalTime());
+						pc.printNumber();
+
+					}
 
 				} catch (InterruptedException e) {
 	    			e.printStackTrace();
@@ -143,6 +148,21 @@ public class SampleController
 			// Set the request content type to JSON
 			con.setRequestProperty("Content-Type", "application/json");
 			con.setRequestProperty("Authorization", "Bearer "+jwtToken);
+
+			if(con.getResponseCode()==401)
+			{
+				System.out.println("401");
+				postRequest();
+				return getServicesRequest();
+			}
+
+			if(con.getResponseCode()==403)
+			{
+				postRequest();
+				System.out.println("403");
+				Thread.sleep(30000);
+				return getServicesRequest();
+			}
 			// Read the response
 			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 			String inputLine;
@@ -153,6 +173,7 @@ public class SampleController
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			postRequest();
 		}
 		return content.toString();
 	}
@@ -173,6 +194,28 @@ public class SampleController
 			// Set the request content type to JSON
 			con.setRequestProperty("Content-Type", "application/json");
 			con.setRequestProperty("Authorization", "Bearer "+jwtToken);
+
+			if(con.getResponseCode()==401)
+			{
+				System.out.println("401");
+				postRequest();
+				return createNewAppointmentRequest(serviceId);
+			}
+
+			else if(con.getResponseCode()==403)
+			{
+				postRequest();
+				System.out.println("403");
+				Thread.sleep(30000);
+				return createNewAppointmentRequest(serviceId);
+			}
+
+			else if(con.getResponseCode()==400)
+			{
+				return "400";
+			}
+
+
 			// Read the response
 			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 			String inputLine;
@@ -183,10 +226,38 @@ public class SampleController
 
 		} catch (Exception e) {
 			e.printStackTrace();
+
 		}
 		return content.toString();
 
 	}
+
+	private Future<JWT> getJWTCallable()
+	{
+		Callable<JWT> task = () -> {
+			String response=postRequest();
+			return JSONParser.createJWTObject(response.toString());
+		};
+		return executorService.submit(task);
+	}
+
+	private void getJWT() {
+		Thread thread = new Thread(){
+			public void run() {
+				try {
+					jwtToken = getJWTCallable().get().getToken();
+
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+
+			};
+		};
+		thread.start();
+	}
+
 
 	private Future<List<Service>>getServices(){
 		Callable<List<Service>> task = () -> {
@@ -200,6 +271,8 @@ public class SampleController
 	private Future<AppointmentInfoResponse>createNewAppointment(long serviceId){
 		Callable<AppointmentInfoResponse> task = () -> {
 			String response = createNewAppointmentRequest(serviceId);
+			if(response=="400")
+				return null;
 			return JSONParser.createAppointmentInfoResponseObject(response);
 		};
 		
@@ -229,8 +302,64 @@ public class SampleController
 	    };
 	    thread.start();
 	}
+
+	private void getToken(boolean isInitialized)
+	{
+		Dialog<Boolean> dialog=new Dialog<Boolean>();
+		//otvoriti dialog
+		if(isInitialized)
+		{
+			Stage stage=(Stage)root.getScene().getWindow();
+			dialog.setTitle("Učitavanje");
+			dialog.initOwner(stage);
+			stage.setAlwaysOnTop(true);
+			dialog.show();
+		}
+		postRequestCall();
+		if(isInitialized)
+		{
+			Platform.runLater(() ->
+			{
+				dialog.setResult(true);
+				dialog.close();
+			});
+		}
+		if(!isInitialized)
+		{
+			buttons= new Button[]{button1, button2, button3, button4};
+			getAllServices(buttons);
+		}
+	}
+
+	private void postRequestCall()
+	{
+		Thread thread = new Thread(){
+			public void run() {
+				String responseCode="";
+				while(responseCode.equals("")){
+					try{
+						responseCode=postRequest();
+					}catch(Exception e){
+						System.out.println(e);
+					}
+					if(!responseCode.equals("200"))
+					{
+						Platform.runLater(() -> {
+							try {
+								Thread.sleep(5000);
+							} catch (InterruptedException e) {
+								throw new RuntimeException(e);
+							}
+						});
+					}
+				}
+			};
+		};
+		thread.start();
+
+	}
 	
-	private String postRequest(String url_string)
+	private String postRequest()
 	{
         StringBuffer content = new StringBuffer();
         try {
@@ -259,14 +388,32 @@ public class SampleController
                 content.append(inputLine);
             }
             in.close();
+			if(con.getResponseCode()==HttpURLConnection.HTTP_OK)
+			{
+				JWT jwt=JSONParser.createJWTObject(content.toString());
+				jwtToken=jwt.getToken();
+				System.out.println(jwt.getSubject());
+			}
+			else
+			{
+				Thread.sleep(30000);
+				return postRequest();
+			}
+			return String.valueOf(con.getResponseCode());
 
             // Print the response content
         } catch (Exception e) {
-            e.printStackTrace();
+			try {
+				Thread.sleep(30000);
+				return postRequest();
+			}
+			catch (Exception ex){
+
+			}
         }
-		JWT jwt=JSONParser.createJWTObject(content.toString());
-		jwtToken=jwt.getToken();
-		return content.toString();
+//		JWT jwt=JSONParser.createJWTObject(content.toString());
+//		jwtToken=jwt.getToken();
+		return "";
 	}
 	
 	@FXML private void button1Clicked()
