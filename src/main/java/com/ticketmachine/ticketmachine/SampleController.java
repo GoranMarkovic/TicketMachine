@@ -12,8 +12,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -133,101 +133,131 @@ public class SampleController
 	    thread.start();
 	}
 
-	private String getServicesRequest()
-	{
+	private String getServicesRequest() throws IOException {
 		StringBuffer content = new StringBuffer();
-		try {
-			// Set up the URL and open a connection
-			URL url = new URL("https://qm.banjaluka.rs.ba:443/api/services");
+		String postResponse="";
+		HttpURLConnection con=null;
+		while(con==null || con.getResponseCode()!=200)
+		{
+			try {
+				// Set up the URL and open a connection
+				URL url = new URL("https://qm.banjaluka.rs.ba:443/api/services");
 //			URL url = new URL("http://localhost:8080/api/services");
-			HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+				con = (HttpURLConnection) url.openConnection();
 
-			// Set the request method to POST
-			con.setRequestMethod("GET");
+				// Set the request method to POST
+				con.setRequestMethod("GET");
 
-			// Set the request content type to JSON
-			con.setRequestProperty("Content-Type", "application/json");
-			con.setRequestProperty("Authorization", "Bearer "+jwtToken);
+				// Set the request content type to JSON
+				con.setRequestProperty("Content-Type", "application/json");
+				con.setRequestProperty("Authorization", "Bearer "+jwtToken);
 
-			if(con.getResponseCode()==401)
-			{
-				System.out.println("401");
-				postRequest();
-				return getServicesRequest();
+				if(con.getResponseCode()==401)
+				{
+					System.out.println("401");
+					Thread.sleep(1000);
+					postResponse=postRequest();
+					if(postResponse=="exception")
+					{
+						return "exception";
+					}
+//					return getServicesRequest();
+				}
+
+				if(con.getResponseCode()==403)
+				{
+					Thread.sleep(1000);
+					postResponse=postRequest();
+					if(postResponse=="exception")
+					{
+						return "exception";
+					}
+					System.out.println("403");
+//					return getServicesRequest();
+				}
+				// Read the response
+				if(con.getResponseCode()==200)
+				{
+					BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+					String inputLine;
+					while ((inputLine = in.readLine()) != null) {
+						content.append(inputLine);
+					}
+					in.close();
+				}
+
+			}
+			catch (Exception e) {
+				//ovdje vratiti poseban string koji cu prepoznati tamo u funkciji gdje zovem ovu
+				//isti princip napraviti i za createNewAppointment, samo tamo ako je van sati onda ne raditi nista
+				//za post request mala sansa da bude exception jer se on poziva samo pri pozivu ovih funckija
+				//a to znaci da bi one prve izbacile exception
+				e.printStackTrace();
+				return "exception";
+//			postRequest();
 			}
 
-			if(con.getResponseCode()==403)
-			{
-				postRequest();
-				System.out.println("403");
-				Thread.sleep(30000);
-				return getServicesRequest();
-			}
-			// Read the response
-			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-			String inputLine;
-			while ((inputLine = in.readLine()) != null) {
-				content.append(inputLine);
-			}
-			in.close();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			postRequest();
 		}
 		return content.toString();
 	}
 
-	private String createNewAppointmentRequest(long serviceId)
-	{
+	private String createNewAppointmentRequest(long serviceId) throws IOException {
 		StringBuffer content = new StringBuffer();
-		try {
-			// Set up the URL and open a connection
+		String postResponse="";
+		HttpURLConnection con=null;
+
+		while(con==null || con.getResponseCode()!=200)
+		{
+			try {
+				// Set up the URL and open a connection
 //			URL url = new URL("http://localhost:8080/api/appointments/new?service_id="+serviceId);
-			URL url = new URL("https://qm.banjaluka.rs.ba:443/api/appointments/new?service_id="+serviceId);
+				URL url = new URL("https://qm.banjaluka.rs.ba:443/api/appointments/new?service_id="+serviceId);
 
-			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+				con = (HttpURLConnection) url.openConnection();
 
-			// Set the request method to POST
-			con.setRequestMethod("GET");
+				// Set the request method to POST
+				con.setRequestMethod("GET");
 
-			// Set the request content type to JSON
-			con.setRequestProperty("Content-Type", "application/json");
-			con.setRequestProperty("Authorization", "Bearer "+jwtToken);
+				// Set the request content type to JSON
+				con.setRequestProperty("Content-Type", "application/json");
+				con.setRequestProperty("Authorization", "Bearer "+jwtToken);
 
-			if(con.getResponseCode()==401)
-			{
-				System.out.println("401");
-				postRequest();
-				return createNewAppointmentRequest(serviceId);
+				if(con.getResponseCode()==401 || con.getResponseCode()==403)
+				{
+					Thread.sleep(1000);
+					postResponse=postRequest();
+					if(postResponse=="exception")
+					{
+						return "exception";
+					}
+				}
+
+
+				else if(con.getResponseCode()==400)
+				{
+					//van sati
+					return "400";
+				}
+
+				if(con.getResponseCode()==200)
+				{
+					// Read the response
+					BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+					String inputLine;
+					while ((inputLine = in.readLine()) != null) {
+						content.append(inputLine);
+					}
+					in.close();
+
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				return "exception";
 			}
-
-			else if(con.getResponseCode()==403)
-			{
-				postRequest();
-				System.out.println("403");
-				Thread.sleep(30000);
-				return createNewAppointmentRequest(serviceId);
-			}
-
-			else if(con.getResponseCode()==400)
-			{
-				return "400";
-			}
-
-
-			// Read the response
-			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-			String inputLine;
-			while ((inputLine = in.readLine()) != null) {
-				content.append(inputLine);
-			}
-			in.close();
-
-		} catch (Exception e) {
-			e.printStackTrace();
 
 		}
+
 		return content.toString();
 
 	}
@@ -261,7 +291,17 @@ public class SampleController
 
 	private Future<List<Service>>getServices(){
 		Callable<List<Service>> task = () -> {
-			String response = getServicesRequest();
+			String response="exception";
+			long milis=1000;
+			while(response=="exception")
+			{
+				response=getServicesRequest();
+				Thread.sleep(milis);
+				if(milis<=64000)
+				{
+					milis*=2;
+				}
+			}
 			return JSONParser.createServiceListObject(response);
 		};
 		
@@ -270,7 +310,17 @@ public class SampleController
 	
 	private Future<AppointmentInfoResponse>createNewAppointment(long serviceId){
 		Callable<AppointmentInfoResponse> task = () -> {
-			String response = createNewAppointmentRequest(serviceId);
+			String response="exception";
+			long milis=1000;
+			while(response=="exception")
+			{
+				response = createNewAppointmentRequest(serviceId);
+				Thread.sleep(milis);
+				if(milis<=64000)
+				{
+					milis*=2;
+				}
+			}
 			if(response=="400")
 				return null;
 			return JSONParser.createAppointmentInfoResponseObject(response);
@@ -359,58 +409,71 @@ public class SampleController
 
 	}
 	
-	private String postRequest()
-	{
+	private String postRequest() throws IOException {
         StringBuffer content = new StringBuffer();
-        try {
-            // Set up the URL and open a connection
-            URL url = new URL("https://qm.banjaluka.rs.ba:443/api/authenticate/external");
-//			URL url = new URL("http://localhost:8080/api/authenticate/external");
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		HttpURLConnection con = null;
 
-            // Set the request method to POST
-            con.setRequestMethod("POST");
-
-            // Set the request content type to JSON
-            con.setRequestProperty("Content-Type", "application/json");
-
-            // Set up the request body
-            String requestBody = "{\"username\": \"ticketMachine\", \"password\": \"CkwMhvpgcdKAJp46Vvjbq7XrAxLGYKTa5XPfs4g\"}";
-            con.setDoOutput(true);
-            OutputStream os = con.getOutputStream();
-            byte[] input = requestBody.getBytes("utf-8");
-            os.write(input, 0, input.length);
-
-            // Read the response
-            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            String inputLine;
-            while ((inputLine = in.readLine()) != null) {
-                content.append(inputLine);
-            }
-            in.close();
-			if(con.getResponseCode()==HttpURLConnection.HTTP_OK)
-			{
-				JWT jwt=JSONParser.createJWTObject(content.toString());
-				jwtToken=jwt.getToken();
-				System.out.println(jwt.getSubject());
-			}
-			else
-			{
-				Thread.sleep(30000);
-				return postRequest();
-			}
-			return String.valueOf(con.getResponseCode());
-
-            // Print the response content
-        } catch (Exception e) {
+		while(con==null || con.getResponseCode()!=200)
+		{
 			try {
-				Thread.sleep(30000);
-				return postRequest();
-			}
-			catch (Exception ex){
+				// Set up the URL and open a connection
+				URL url = new URL("https://qm.banjaluka.rs.ba:443/api/authenticate/external");
+//			URL url = new URL("http://localhost:8080/api/authenticate/external");
+				con = (HttpURLConnection) url.openConnection();
 
+				// Set the request method to POST
+				con.setRequestMethod("POST");
+
+				// Set the request content type to JSON
+				con.setRequestProperty("Content-Type", "application/json");
+
+				// Set up the request body
+				String requestBody = "{\"username\": \"ticketMachine\", \"password\": \"CkwMhvpgcdKAJp46Vvjbq7XrAxLGYKTa5XPfs4g\"}";
+				con.setDoOutput(true);
+				OutputStream os = con.getOutputStream();
+				byte[] input = requestBody.getBytes("utf-8");
+				os.write(input, 0, input.length);
+
+
+				if(con.getResponseCode()==401)
+				{
+					System.out.println("401");
+					Thread.sleep(1000);
+				}
+
+				else if(con.getResponseCode()==403)
+				{
+					Thread.sleep(1000);
+					System.out.println("403");
+				}
+
+				// Read the response
+				else if(con.getResponseCode()==HttpURLConnection.HTTP_OK)
+				{
+					BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+					String inputLine;
+					while ((inputLine = in.readLine()) != null) {
+						content.append(inputLine);
+					}
+					in.close();
+
+					JWT jwt=JSONParser.createJWTObject(content.toString());
+					jwtToken=jwt.getToken();
+					System.out.println(jwt.getSubject());
+					return "200";
+				}
+
+				return String.valueOf(con.getResponseCode());
+
+				// Print the response content
+			} catch (Exception e) {
+				e.printStackTrace();
+				return "exception";
 			}
-        }
+
+		}
+
+
 //		JWT jwt=JSONParser.createJWTObject(content.toString());
 //		jwtToken=jwt.getToken();
 		return "";
