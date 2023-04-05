@@ -38,7 +38,7 @@ public class SampleController
 	private static int counter=0;
 	
 	private final ExecutorService executorService = Executors.newCachedThreadPool();
-	private List<Service> services;
+	private List<Service> services=null;
 	int globalValue;
 
 	public SampleController()
@@ -59,15 +59,25 @@ public class SampleController
 //		getToken(false);
 //		postRequest();
 		buttons= new Button[]{button1, button2, button3, button4};
-		getAllServices(buttons);
+		Platform.runLater(() ->
+		{
+			getAllServices(buttons);
+		});
 	}
 	
 	private void getAllServices(Button[] buttons) {
+		Dialog<Boolean> dialog=createDialog("Konektovanje sa serverom u toku...");
 		Thread thread = new Thread(){
 	    	public void run() {
+				int attempt=0;
 	    		try {
-	    			services = getServices().get();
-	    			
+					while(services==null)
+					{
+//						Thread.sleep(5000);
+						services = getServices().get();
+						attempt++;
+					}
+
 	    		} catch (InterruptedException e) {
 	    			e.printStackTrace();
 	    		} catch (ExecutionException e) {
@@ -82,6 +92,8 @@ public class SampleController
 	            		buttons[i].setText(tmp.getName());
 	            		System.out.println(tmp.getName());
 	            		System.out.println(tmp.getId());
+						dialog.setResult(true);
+						dialog.close();
 	            	}
 	            });
 		        
@@ -90,16 +102,29 @@ public class SampleController
 	    };
 	    thread.start();
 	}
+
+	@FXML
+	private Dialog<Boolean> createDialog(String message)
+	{
+		Stage stage=(Stage)root.getScene().getWindow();
+		Dialog<Boolean> dialog=new Dialog<Boolean>();
+		dialog.setTitle(message);
+		dialog.initOwner(stage);
+		stage.setAlwaysOnTop(true);
+		dialog.show();
+		return dialog;
+	}
 	
 	@FXML
 	private void onClick(long serviceId) {
 		//otvoriti dialog
-		Stage stage=(Stage)root.getScene().getWindow();
-		Dialog<Boolean> dialog=new Dialog<Boolean>();
-		dialog.setTitle("Sačekajte listić");
-		dialog.initOwner(stage);
-		stage.setAlwaysOnTop(true);
-		dialog.show();
+//		Stage stage=(Stage)root.getScene().getWindow();
+//		Dialog<Boolean> dialog=new Dialog<Boolean>();
+//		dialog.setTitle("Sačekajte listić");
+//		dialog.initOwner(stage);
+//		stage.setAlwaysOnTop(true);
+//		dialog.show();
+		Dialog<Boolean> dialog=createDialog("Sačekajte listić");
 
 
 		Thread thread = new Thread(){
@@ -297,11 +322,15 @@ public class SampleController
 			{
 				response=getServicesRequest();
 				Thread.sleep(milis);
-				if(milis<=64000)
+				if(milis<=10000)
 				{
 					milis*=2;
 				}
+				else
+					break;
 			}
+			if(response=="exception")
+				return null;
 			return JSONParser.createServiceListObject(response);
 		};
 		
@@ -314,9 +343,10 @@ public class SampleController
 			long milis=1000;
 			while(response=="exception")
 			{
+				//dodati da izbaci dijalog da nema interneta
 				response = createNewAppointmentRequest(serviceId);
 				Thread.sleep(milis);
-				if(milis<=64000)
+				if(milis<=32000)
 				{
 					milis*=2;
 				}
