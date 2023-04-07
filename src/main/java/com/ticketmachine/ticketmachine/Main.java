@@ -1,9 +1,11 @@
 package com.ticketmachine.ticketmachine;
 
 import javafx.application.Application;
+import javafx.event.Event;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
@@ -24,6 +26,10 @@ public class Main extends Application {
             primaryStage.getIcons().add(new Image("file:///QMLogoReal.jpg"));
             primaryStage.setFullScreen(true);
             primaryStage.setAlwaysOnTop(true);
+
+            primaryStage.setOnCloseRequest(Event::consume);
+            primaryStage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
+
             primaryStage.show();
 
         } catch(Exception e) {

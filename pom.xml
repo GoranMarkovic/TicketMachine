@@ -84,9 +84,9 @@
                             <mainClass>
                                 com.ticketmachine.ticketmachine/com.ticketmachine.ticketmachine.Main
                             </mainClass>
-                            <launcher>app</launcher>
-                            <jlinkZipName>app</jlinkZipName>
-                            <jlinkImageName>app</jlinkImageName>
+                            <launcher>qmanager</launcher>
+                            <jlinkZipName>qmanager</jlinkZipName>
+                            <jlinkImageName>qmanager</jlinkImageName>
                             <noManPages>true</noManPages>
                             <stripDebug>true</stripDebug>
                             <noHeaderFiles>true</noHeaderFiles>
