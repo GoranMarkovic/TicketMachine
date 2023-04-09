@@ -62,37 +62,81 @@ public class PrintClass {
 					g2d.drawLine(10, y, 200, y);
 					y+=yShift;
 
-					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,12)).stringWidth("Vrijeme izdavanja: "+dtf.format(vrijemeIzdavanja));
+
+//					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,12)).stringWidth("Vrijeme izdavanja: "+dtf.format(vrijemeIzdavanja));
+					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.PLAIN,12)).stringWidth("Vrijeme izdavanja: ");
+					widthOfString+=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,12)).stringWidth(dtf.format(vrijemeIzdavanja));
 					starting=(int)(width-widthOfString)/2;
+					g2d.setFont(new Font("Times New Roman", Font.PLAIN,12));
+//					g2d.drawString("Vrijeme izdavanja: "+dtf.format(vrijemeIzdavanja), starting, y);
+					g2d.drawString("Vrijeme izdavanja: ",starting, y);
+					starting=starting+g2d.getFontMetrics(new Font("Times New Roman", Font.PLAIN,12)).stringWidth("Vrijeme izdavanja: ");
 					g2d.setFont(new Font("Times New Roman", Font.BOLD,12));
-					g2d.drawString("Vrijeme izdavanja: "+dtf.format(vrijemeIzdavanja), starting, y);
+					g2d.drawString(dtf.format(vrijemeIzdavanja),starting, y);
 					y+=yShift;
 
 
-					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,12)).stringWidth("Vrijeme usluživanja: "+dtf.format(vrijemeUsluzivanja));
+					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.PLAIN,12)).stringWidth("Usluga: ");
+					widthOfString+=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,12)).stringWidth(usluga);
 					starting=(int)(width-widthOfString)/2;
+					g2d.setFont(new Font("Times New Roman", Font.PLAIN,12));
+//					g2d.drawString("Vrijeme izdavanja: "+dtf.format(vrijemeIzdavanja), starting, y);
+					g2d.drawString("Usluga: ",starting, y);
+					starting=starting+g2d.getFontMetrics(new Font("Times New Roman", Font.PLAIN,12)).stringWidth("Usluga: ");
 					g2d.setFont(new Font("Times New Roman", Font.BOLD,12));
-					g2d.drawString("Vrijeme usluživanja: "+dtf.format(vrijemeUsluzivanja), starting, y);
+					g2d.drawString(usluga,starting, y);
+					y+=yShift;
 
-					y+=yShift;
+
+//					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,12)).stringWidth("Vrijeme usluživanja: "+dtf.format(vrijemeUsluzivanja));
+//					starting=(int)(width-widthOfString)/2;
+//					g2d.setFont(new Font("Times New Roman", Font.BOLD,12));
+//					g2d.drawString("Vrijeme usluživanja: "+dtf.format(vrijemeUsluzivanja), starting, y);
+//
+//					y+=yShift;
 					
-					g2d.setFont(new Font("Times New Roman", Font.BOLD,12));
-					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,12)).stringWidth("Usluga: "+usluga);
+//					g2d.setFont(new Font("Times New Roman", Font.BOLD,12));
+//					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,12)).stringWidth("Usluga: "+usluga);
+//					starting=(int)(width-widthOfString)/2;
+//					g2d.drawString("Usluga: "+usluga, starting, y);
+//					y+=yShift;
+
+
+					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.PLAIN,12)).stringWidth("Kancelarija: ");
+					widthOfString+=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,12)).stringWidth(kancelarija);
 					starting=(int)(width-widthOfString)/2;
-					g2d.drawString("Usluga: "+usluga, starting, y);
-					y+=yShift;
-					
+					g2d.setFont(new Font("Times New Roman", Font.PLAIN,12));
+//					g2d.drawString("Vrijeme izdavanja: "+dtf.format(vrijemeIzdavanja), starting, y);
+					g2d.drawString("Kancelarija: ",starting, y);
+					starting=starting+g2d.getFontMetrics(new Font("Times New Roman", Font.PLAIN,12)).stringWidth("Kancelarija: ");
 					g2d.setFont(new Font("Times New Roman", Font.BOLD,12));
-					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,12)).stringWidth("Kancelarija: "+ kancelarija);
-					starting=(int)(width-widthOfString)/2;
-					g2d.drawString("Kancelarija: "+ kancelarija, starting, y);
+					g2d.drawString(kancelarija,starting, y);
 					y+=yShift;
-					
+
+
+//					g2d.setFont(new Font("Times New Roman", Font.BOLD,12));
+//					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,12)).stringWidth("Kancelarija: "+ kancelarija);
+//					starting=(int)(width-widthOfString)/2;
+//					g2d.drawString("Kancelarija: "+ kancelarija, starting, y);
+//					y+=yShift;
+
+					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.PLAIN,12)).stringWidth("Broj klijenata ispred Vas: ");
+					widthOfString+=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,12)).stringWidth(brojIspred);
+					starting=(int)(width-widthOfString)/2;
+					g2d.setFont(new Font("Times New Roman", Font.PLAIN,12));
+//					g2d.drawString("Vrijeme izdavanja: "+dtf.format(vrijemeIzdavanja), starting, y);
+					g2d.drawString("Broj klijenata ispred Vas: ",starting, y);
+					starting=starting+g2d.getFontMetrics(new Font("Times New Roman", Font.PLAIN,12)).stringWidth("Broj klijenata ispred Vas: ");
 					g2d.setFont(new Font("Times New Roman", Font.BOLD,12));
-					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,12)).stringWidth("Broj klijenata ispred Vas: "+brojIspred);
-					starting=(int)(width-widthOfString)/2;
-					g2d.drawString("Broj klijenata ispred Vas: "+brojIspred, starting, y);
+					g2d.drawString(brojIspred,starting, y);
 					y+=yShift;
+
+
+//					g2d.setFont(new Font("Times New Roman", Font.BOLD,12));
+//					widthOfString=g2d.getFontMetrics(new Font("Times New Roman", Font.BOLD,12)).stringWidth("Broj klijenata ispred Vas: "+brojIspred);
+//					starting=(int)(width-widthOfString)/2;
+//					g2d.drawString("Broj klijenata ispred Vas: "+brojIspred, starting, y);
+//					y+=yShift;
 
 					
 				}
@@ -148,7 +192,7 @@ protected static double toPPI(double inch)
 			//ispod unijeti ime stampaca
 			//EPSON TM-T88VI Receipt
 			//Microsoft Print to PDF
-			if(service.getName().equals("EPSON TM-T88VI Receipt"))
+			if(service.getName().equals("Microsoft Print to PDF"))
 			{
 				try
 				{
