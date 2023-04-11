@@ -246,6 +246,7 @@ public class SampleController
 				// Set the request content type to JSON
 				con.setRequestProperty("Content-Type", "application/json");
 				con.setRequestProperty("Authorization", "Bearer "+jwtToken);
+				System.out.println("App code is "+con.getResponseCode());
 
 				if(con.getResponseCode()==401 || con.getResponseCode()==403)
 				{
@@ -264,7 +265,7 @@ public class SampleController
 					return "400";
 				}
 
-				if(con.getResponseCode()==200)
+				else if(con.getResponseCode()==200)
 				{
 					// Read the response
 					BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
@@ -464,7 +465,7 @@ public class SampleController
 				byte[] input = requestBody.getBytes("utf-8");
 				os.write(input, 0, input.length);
 
-
+				System.out.println("Post code is "+con.getResponseCode());
 				if(con.getResponseCode()==401)
 				{
 					System.out.println("401");
