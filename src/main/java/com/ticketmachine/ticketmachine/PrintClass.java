@@ -192,7 +192,7 @@ protected static double toPPI(double inch)
 			//ispod unijeti ime stampaca
 			//EPSON TM-T88VI Receipt
 			//Microsoft Print to PDF
-			if(service.getName().equals("Microsoft Print to PDF"))
+			if(service.getName().equals("EPSON TM-T88VI Receipt"))
 			{
 				try
 				{
