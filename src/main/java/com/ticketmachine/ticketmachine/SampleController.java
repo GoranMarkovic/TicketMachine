@@ -1,16 +1,21 @@
 package com.ticketmachine.ticketmachine;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -35,10 +40,9 @@ public class SampleController
 	@FXML AnchorPane anchorPaneButtons;
 	@FXML private GridPane buttonGridPane; 
 	
-	private static int counter=0;
-	
+
 	private final ExecutorService executorService = Executors.newCachedThreadPool();
-	private List<Service> services=null;
+	private List<Service> services;
 	int globalValue;
 
 	public SampleController()
@@ -56,33 +60,51 @@ public class SampleController
 	public void initialize()
 	{
 		Timenow();
-//		getToken(false);
-//		postRequest();
 		buttons= new Button[]{button1, button2, button3, button4};
 		Platform.runLater(() ->
 		{
 			getAllServices(buttons);
 		});
 	}
+
+	@FXML
+	private Dialog<Boolean> createDialog(String message)
+	{
+		Stage stage=(Stage)root.getScene().getWindow();
+		Dialog<Boolean> dialog=new Dialog<Boolean>();
+		dialog.getDialogPane().setPrefSize(600,100);
+		dialog.setTitle("QManager");
+		Label contentLabel = new Label(message);
+//		contentLabel.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+		contentLabel.setFont(Font.font("Times New Roman", FontWeight.BOLD, 32)); // set font size to 16
+		contentLabel.setAlignment(Pos.CENTER);
+		contentLabel.setTextFill(Color.WHITE);
+		contentLabel.setTextAlignment(TextAlignment.CENTER);
+		dialog.getDialogPane().setContent(contentLabel);
+//		dialog.setContentText(message);
+		dialog.initOwner(stage);
+//		dialog.getDialogPane().setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+		stage.setAlwaysOnTop(true);
+		dialog.show();
+		return dialog;
+	}
 	
 	private void getAllServices(Button[] buttons) {
-		Dialog<Boolean> dialog=createDialog("Konektovanje sa serverom u toku...");
+		Dialog<Boolean> dialog=createDialog("Konektovanje sa serverom...");
 		Thread thread = new Thread(){
 	    	public void run() {
-				int attempt=0;
 	    		try {
-					while(services==null)
-					{
-//						Thread.sleep(5000);
-						services = getServices().get();
-						attempt++;
-					}
+					services = getServices().get();
 
 	    		} catch (InterruptedException e) {
 	    			e.printStackTrace();
 	    		} catch (ExecutionException e) {
 	    			e.printStackTrace();
 	    		}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
 	    		
 	            Platform.runLater(() -> {
 	                 //pridruzi UI komponenti List<Service> services
@@ -102,31 +124,11 @@ public class SampleController
 	    };
 	    thread.start();
 	}
-
-	@FXML
-	private Dialog<Boolean> createDialog(String message)
-	{
-		Stage stage=(Stage)root.getScene().getWindow();
-		Dialog<Boolean> dialog=new Dialog<Boolean>();
-		dialog.setTitle(message);
-		dialog.initOwner(stage);
-		stage.setAlwaysOnTop(true);
-		dialog.show();
-		return dialog;
-	}
 	
 	@FXML
 	private void onClick(long serviceId) {
-		//otvoriti dialog
-//		Stage stage=(Stage)root.getScene().getWindow();
-//		Dialog<Boolean> dialog=new Dialog<Boolean>();
-//		dialog.setTitle("Sačekajte listić");
-//		dialog.initOwner(stage);
-//		stage.setAlwaysOnTop(true);
-//		dialog.show();
-		Dialog<Boolean> dialog=createDialog("Sačekajte listić");
 
-
+		Dialog<Boolean> dialog=createDialog("Sačekajte listić...");
 		Thread thread = new Thread(){
 	    	public void run() {
 	    		try {
@@ -138,8 +140,22 @@ public class SampleController
 						PrintClass pc=new PrintClass(appointment.getService().getName(), appointment.getService().getOfficeName(),clientsInFront,appointment.getTag(),
 								appointment.getCreatedTime(),appointmentInfoResponse.getArrivalTime());
 						pc.printNumber();
-
 					}
+
+					else
+					{
+						Platform.runLater(() -> {
+							Label contentLabel = new Label("Neuspješna rezervacija...");
+							contentLabel.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+							contentLabel.setFont(Font.font("Times New Roman", FontWeight.BOLD, 32)); // set font size to 16
+							contentLabel.setAlignment(Pos.CENTER);
+							contentLabel.setTextAlignment(TextAlignment.CENTER);
+
+							dialog.getDialogPane().setContent(contentLabel);
+							dialog.show();
+						});
+					}
+
 
 				} catch (InterruptedException e) {
 	    			e.printStackTrace();
@@ -148,8 +164,11 @@ public class SampleController
 	    		}
 	    		
 	            Platform.runLater(() -> {
-	                 dialog.setResult(true);
-					 dialog.close();
+					Timeline timeline=new Timeline(new KeyFrame(Duration.seconds(5), event ->{
+						dialog.setResult(true);
+						dialog.close();
+					}));
+					timeline.play();
 	            });
 		        
 
@@ -177,7 +196,7 @@ public class SampleController
 				con.setRequestProperty("Content-Type", "application/json");
 				con.setRequestProperty("Authorization", "Bearer "+jwtToken);
 
-				if(con.getResponseCode()==401)
+				if(con.getResponseCode()==401 || con.getResponseCode()==403)
 				{
 					System.out.println("401");
 					Thread.sleep(1000);
@@ -189,17 +208,6 @@ public class SampleController
 //					return getServicesRequest();
 				}
 
-				if(con.getResponseCode()==403)
-				{
-					Thread.sleep(1000);
-					postResponse=postRequest();
-					if(postResponse=="exception")
-					{
-						return "exception";
-					}
-					System.out.println("403");
-//					return getServicesRequest();
-				}
 				// Read the response
 				if(con.getResponseCode()==200)
 				{
@@ -213,20 +221,15 @@ public class SampleController
 
 			}
 			catch (Exception e) {
-				//ovdje vratiti poseban string koji cu prepoznati tamo u funkciji gdje zovem ovu
-				//isti princip napraviti i za createNewAppointment, samo tamo ako je van sati onda ne raditi nista
-				//za post request mala sansa da bude exception jer se on poziva samo pri pozivu ovih funckija
-				//a to znaci da bi one prve izbacile exception
 				e.printStackTrace();
 				return "exception";
-//			postRequest();
 			}
 
 		}
 		return content.toString();
 	}
 
-	private String createNewAppointmentRequest(long serviceId) throws IOException {
+	private String createNewAppointmentRequest(long serviceId) throws Exception {
 		StringBuffer content = new StringBuffer();
 		String postResponse="";
 		HttpURLConnection con=null;
@@ -277,43 +280,20 @@ public class SampleController
 
 				}
 
+				else
+					return "exception"; //neuspjesan pokusaj rezervacije
+
 			} catch (Exception e) {
 				e.printStackTrace();
 				return "exception";
 			}
 
 		}
+		System.out.println(content.toString());
 
 		return content.toString();
 
 	}
-
-	private Future<JWT> getJWTCallable()
-	{
-		Callable<JWT> task = () -> {
-			String response=postRequest();
-			return JSONParser.createJWTObject(response.toString());
-		};
-		return executorService.submit(task);
-	}
-
-	private void getJWT() {
-		Thread thread = new Thread(){
-			public void run() {
-				try {
-					jwtToken = getJWTCallable().get().getToken();
-
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				} catch (ExecutionException e) {
-					e.printStackTrace();
-				}
-
-			};
-		};
-		thread.start();
-	}
-
 
 	private Future<List<Service>>getServices(){
 		Callable<List<Service>> task = () -> {
@@ -322,16 +302,13 @@ public class SampleController
 			while(response=="exception")
 			{
 				response=getServicesRequest();
-				Thread.sleep(milis);
-				if(milis<=10000)
+				if(response=="exception")
+					Thread.sleep(milis);
+				if(milis<=20000)
 				{
 					milis*=2;
 				}
-				else
-					break;
 			}
-			if(response=="exception")
-				return null;
 			return JSONParser.createServiceListObject(response);
 		};
 		
@@ -340,20 +317,11 @@ public class SampleController
 	
 	private Future<AppointmentInfoResponse>createNewAppointment(long serviceId){
 		Callable<AppointmentInfoResponse> task = () -> {
-			String response="exception";
-			long milis=1000;
-			while(response=="exception")
-			{
-				//dodati da izbaci dijalog da nema interneta
-				response = createNewAppointmentRequest(serviceId);
-				Thread.sleep(milis);
-				if(milis<=32000)
-				{
-					milis*=2;
-				}
-			}
-			if(response=="400")
+
+			String response=createNewAppointmentRequest(serviceId);
+			if(response=="exception" || response=="400")
 				return null;
+
 			return JSONParser.createAppointmentInfoResponseObject(response);
 		};
 		
@@ -384,63 +352,8 @@ public class SampleController
 	    thread.start();
 	}
 
-	private void getToken(boolean isInitialized)
-	{
-		Dialog<Boolean> dialog=new Dialog<Boolean>();
-		//otvoriti dialog
-		if(isInitialized)
-		{
-			Stage stage=(Stage)root.getScene().getWindow();
-			dialog.setTitle("Učitavanje");
-			dialog.initOwner(stage);
-			stage.setAlwaysOnTop(true);
-			dialog.show();
-		}
-		postRequestCall();
-		if(isInitialized)
-		{
-			Platform.runLater(() ->
-			{
-				dialog.setResult(true);
-				dialog.close();
-			});
-		}
-		if(!isInitialized)
-		{
-			buttons= new Button[]{button1, button2, button3, button4};
-			getAllServices(buttons);
-		}
-	}
 
-	private void postRequestCall()
-	{
-		Thread thread = new Thread(){
-			public void run() {
-				String responseCode="";
-				while(responseCode.equals("")){
-					try{
-						responseCode=postRequest();
-					}catch(Exception e){
-						System.out.println(e);
-					}
-					if(!responseCode.equals("200"))
-					{
-						Platform.runLater(() -> {
-							try {
-								Thread.sleep(5000);
-							} catch (InterruptedException e) {
-								throw new RuntimeException(e);
-							}
-						});
-					}
-				}
-			};
-		};
-		thread.start();
-
-	}
-	
-	private String postRequest() throws IOException {
+	private String postRequest() throws Exception {
         StringBuffer content = new StringBuffer();
 		HttpURLConnection con = null;
 
@@ -494,6 +407,9 @@ public class SampleController
 					return "200";
 				}
 
+				else
+					return "exception"; //tretiramo kao neuspjesan pokusaj
+
 				return String.valueOf(con.getResponseCode());
 
 				// Print the response content
@@ -504,10 +420,7 @@ public class SampleController
 
 		}
 
-
-//		JWT jwt=JSONParser.createJWTObject(content.toString());
-//		jwtToken=jwt.getToken();
-		return "";
+		return "exception"; // ne bi trebalo do ovoga da dodje ali za svaki slucaj tretirati kao neuspjesan pokusaj
 	}
 	
 	@FXML private void button1Clicked()
@@ -562,8 +475,12 @@ public class SampleController
 	{
 		String buttonText= button4.getText();
 		Service service = null;
+		System.out.println("Size je " +services.size());
+
 		for(int i=0;i<services.size();i++)
 		{
+			System.out.println(services.get(i).getName());
+			System.out.println(buttonText);
 			if(services.get(i).getName()==buttonText)
 			{
 				service=services.get(i);
